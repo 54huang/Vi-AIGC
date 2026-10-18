@@ -1,0 +1,50 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# OS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Editors and local workspace state
+*~
+*.swp
+*.swo
+.idea/workspace.xml
+.vscode/*.local.json
+
+# Logs, temporary files, and local caches
+*.log
+*.tmp
+*.temp
+*.bak
+.cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Optional automation/runtime dependencies
+node_modules/
+.venv/
+venv/
+
+# Reproducible local video-generation output; move approved reusable assets
+# into a documented, permission-cleared project directory before tracking them.
+/outputs/generated/
+/outputs/cache/
+
+# Large local model and checkpoint files (keep manifests/configuration in Git)
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+*.onnx
