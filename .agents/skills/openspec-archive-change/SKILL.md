@@ -1,7 +1,7 @@
 ---
 name: openspec-archive-change
 description: Archive a completed OpenSpec change in the experimental workflow. Use when the user wants to finalize and archive a change after implementation is complete. Also use when the user says "openspec archive" or "opsx archive".
-allowed-tools: Bash(openspec:*)
+allowed-tools: Bash(openspec:*), Bash(git:*)
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -171,6 +171,21 @@ In both branches, never create the root as a side effect: do not run `openspec i
    ```bash
    mv "<changeRoot>" "<planningHome.changesDir>/archive/<target-name>"
    ```
+
+**Version, commit, and remote delivery (project release policy):**
+
+After the archive operation succeeds and its summary inputs are known, apply the repository release policy below. This is a project-specific delivery step; it does not replace any OpenSpec archive, sync, or validation checks above.
+
+1. Inspect `git status --short --branch`, `git remote -v`, `git log -5 --oneline --decorate`, and `git tag --list 'v*' --sort=-version:refname`. Review the diff and stage only files belonging to the completed change, synced specs, and its archive. Never include unrelated user changes, secrets, generated caches, or untracked files that are not part of the release.
+2. Select the next Semantic Versioning version from the latest `vMAJOR.MINOR.PATCH` tag (ignore non-SemVer tags):
+   - **MAJOR** (`X.0.0`): incompatible changes to established workflow/spec contracts, or removing/renaming established capabilities in a way that breaks existing use.
+   - **MINOR** (`x.Y.0`): new backward-compatible workflow capabilities, stages, or supported outputs.
+   - **PATCH** (`x.y.Z`): backward-compatible corrections, refinements, and documentation/metadata changes that do not add a distinct capability.
+   - For the first complete, usable project archive, when no SemVer release tag exists, use **`v1.0.0`**. Do not infer the version from the count of commits. Explain the chosen level and notable change in the archive summary.
+3. Create a release commit with a clear conventional message containing the version, for example `release: v1.2.0 — add reference-asset stage`. Commit only after archive/sync verification. If the worktree contains unrelated changes that cannot safely be excluded, stop before committing and report this; do not stash, reset, or overwrite user work.
+4. Create an annotated Git tag named exactly `v<MAJOR>.<MINOR>.<PATCH>` on that release commit. If that tag already exists locally or remotely, stop and resolve the version conflict; never move or overwrite a published tag.
+5. Push the release branch and tag to the configured GitHub remote (normally `origin`): `git push <remote> <branch>` followed by `git push <remote> vX.Y.Z`. Verify with `git ls-remote --heads --tags <remote>` that the branch and tag point to the intended commit. Never force-push. If no remote is configured, the remote is unreachable, authentication fails, or the remote has diverged, preserve the local archive/commit/tag and report the exact blocker; do not silently claim delivery or rewrite remote history.
+6. Report the archive path, selected version and SemVer rationale, release commit, remote/branch, tag, and push/verification result. A failed push is a delivery failure, not a successful remote release.
 
 6. **Display summary**
 
