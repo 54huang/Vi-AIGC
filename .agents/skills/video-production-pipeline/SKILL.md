@@ -16,6 +16,10 @@ Use this project skill as the reusable production core. It defines the method, n
 5. Separate three layers in every task: **reusable pipeline core**, **project profile** (approved, project-specific facts and settings), and **single-video brief** (this video's changeable choices). Never carry facts or style settings from one project into another.
 6. Match the scope requested. A prompt-only request can receive a ready-to-use prompt; a full production plan follows the complete output contract. Do not expand into tool setup, paid services, publishing, or external mutations unless requested.
 
+## Structured records (optional local validation)
+
+When a project uses this repository's `production-data/` package, read `production-data/README.md` and `production-data/MIGRATION.md`, then validate the YAML package before a configured Release gate. Keep descriptive briefs/scripts in Markdown; use YAML for stable IDs, versions, explicit scopes, references, and review status. A machine `PASS` confirms only deterministic record checks and never approves claims, rights, creative quality, compliance, or publication. Do not invent missing values to make validation pass; unknown or expired data stays pending and is escalated to its owner. Projects that have not adopted structured records continue the existing Markdown workflow.
+
 ## Core rules
 
 - Establish the audience, viewer problem, single takeaway, evidence, platform/format, resources, and requested deliverable before selecting production tools.

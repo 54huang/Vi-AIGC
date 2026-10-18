@@ -1,0 +1,16 @@
+record_type: Claim
+id: claim_demo-feature
+version: 1.0.0
+schema_version: 1.0.0
+status: confirmed
+text: 示例功能主张，仅用于演示。
+sources:
+- locator: https://example.invalid/product-facts
+  retrieved_at: '2026-10-18'
+scope:
+  project_id: profile_demo
+  channels:
+  - youtube
+  valid_from: '2026-01-01'
+  valid_until: '2026-12-31'
+confirmed_by: 示例责任人

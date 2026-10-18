@@ -4,7 +4,7 @@
 
 本仓库维护一套面向 AI 辅助视频制作的**项目无关框架**：从项目背景采集、事实与素材授权核验，到选题、脚本、镜头、声音、参考资产、预演、成片验收和复盘。它帮助创作者稳定地产出可执行的视频方案，并降低反复沟通、返工和素材漂移。
 
-**当前版本：** `v1.0.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
+**当前版本：** `v1.1.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
 
 ## 这是什么 / 不是什么
 
@@ -40,22 +40,58 @@
 1. 在 Codex 或兼容的 Agent 环境中打开本仓库，并让 Agent 读取 [`video-production-pipeline` Skill](.agents/skills/video-production-pipeline/SKILL.md)。
 2. 若是新项目，先按[背景采集流程](.agents/skills/video-production-pipeline/references/background-intake.md)填写[项目背景模板](.agents/skills/video-production-pipeline/references/project-background-template.md)。已有信息可直接整理；缺失事实留作待确认。
 3. 提交本条任务需求：目标、目标观众、观众问题、单一核心结论、时长/平台（如已知）、素材/音乐、资源边界及所需交付物。
-4. 按[生产工作流与质量门禁](.agents/skills/video-production-pipeline/references/production-workflow.md)逐阶段推进。先确认脚本和低成本预演，再批量生成；按反馈只返修受影响的部分。
-5. 框架或规范发生变化时，使用仓库中的 OPSX Skills 建立变更方案、实施、同步规格并归档；归档后的版本、提交和推送遵循[归档发布规则](.agents/skills/openspec-archive-change/SKILL.md)。
+4. 按[生产工作流与质量门禁](.agents/skills/video-production-pipeline/references/production-workflow.md)逐阶段推进。先确认脚本和低成本预演，再批量生成；按反馈只返修受影响的部分。可选采用结构化记录时，先读 [`production-data/README.md`](production-data/README.md)，并依[迁移指南](production-data/MIGRATION.md)试点。
+5. **仅仓库维护者需要：** 修改生产框架或规范时，使用 OPSX Skills 建立变更方案、实施、同步规格并归档；归档后的版本、提交和推送遵循[归档发布规则](.agents/skills/openspec-archive-change/SKILL.md)。普通视频制作不依赖 OPSX。
 
 也可以先查看[项目框架可视化说明](video-production-pipeline.html)。
 
 ## 仓库结构
 
-| 路径 | 用途 |
-|---|---|
-| `.agents/skills/video-production-pipeline/` | 通用视频生产入口 Skill、背景模板、生产步骤、治理规则与参考原则 |
-| `.agents/skills/openspec-*/` | OPSX 探索、提案、更新、实施、规格同步和归档工作流 |
-| `openspec/specs/` | 当前生效的框架规格 |
-| `openspec/changes/` | 正在进行的变更；已完成的方案、计划和任务归档在 `openspec/changes/archive/` |
-| `video-production-pipeline.html` | 框架流程的图形化说明 |
-| `README.md` | 项目介绍与快速开始 |
-| `.gitignore` | 忽略本地凭据、缓存、临时文件和可再生输出；不忽略正式项目资料 |
+仓库中的 Agent Skills 分为两类：**面向视频制作者的生产能力**与**面向仓库维护者的项目管理工具**。它们是独立的 Skill 包，虽然共用 `.agents/skills/` 发现目录，但职责、依赖和使用对象不同。
+
+```text
+.
+├── .agents/skills/
+│   ├── video-production-pipeline/   # 产品能力：AI 辅助视频生产流程，面向使用者
+│   │   ├── SKILL.md                 # 入口与调用规则
+│   │   ├── agents/                  # Agent 元数据
+│   │   └── references/              # 背景采集、项目档案、生产工作流、治理规则
+│   ├── openspec-explore/            # 以下 OPSX Skills 均为维护工具，只面向仓库维护者
+│   ├── openspec-propose/            # 提出变更方案
+│   ├── openspec-update-change/      # 更新方案
+│   ├── openspec-apply-change/       # 实施已批准变更
+│   ├── openspec-sync-specs/         # 同步规格
+│   └── openspec-archive-change/     # 验证并归档变更
+├── production-data/                 # 可选结构化生产记录、Schema 与本地校验器
+│   ├── schemas/                     # 七类记录的结构契约
+│   ├── examples/                    # 完整正例与故意无效的负例
+│   ├── scripts/                     # 本地 YAML/关联校验入口
+│   ├── tests/                       # 自动化验证
+│   ├── README.md                    # 结构、命令与自动/人工边界
+│   └── MIGRATION.md                 # 并行迁移及回滚说明
+├── openspec/
+│   ├── specs/                       # 当前生效的框架规格
+│   └── changes/                     # 进行中的变更及已归档方案
+├── README.md                        # 项目说明、快速开始与维护边界
+└── video-production-pipeline.html  # 生产框架的图形化说明
+```
+
+### 两类 Skill 的使用边界
+
+- **视频制作者 / 使用者：** 使用 `.agents/skills/video-production-pipeline/`。结构化记录是可选试点，需时使用 `production-data/` 提供的本地验证器；不采用时可继续 Markdown 工作流。正常创作不需要调用 OPSX 或安装 OpenSpec CLI。
+- **仓库维护者 / 贡献者：** 在修改生产框架、工作流或规格时，使用 `.agents/skills/openspec-*/` 管理变更，并维护 `openspec/specs/` 与 `openspec/changes/`。这些 Skills 是仓库维护流程，不是视频生产功能。
+- **分发边界：** 若只分发核心 Markdown 制作 Skill，包含 `video-production-pipeline/` 目录即可；若要使用结构化记录校验功能，还需一并分发 `production-data/` 并安装其 Python 依赖。OPSX Skills 和 `openspec/` 属于本仓库的维护体系，不是视频生产运行依赖。
+
+| 路径 | 面向对象 | 用途 |
+|---|---|---|
+| `.agents/skills/video-production-pipeline/` | 视频制作者 | 视频 Brief、脚本、分镜、生成提示词与质量检查 |
+| `production-data/` | 视频制作者（可选） | 项目/Brief/Claim/Asset/Shot/Review/Release 结构化记录、Schema、本地验证器与迁移指南 |
+| `.agents/skills/openspec-*/` | 仓库维护者 | OPSX 探索、提案、更新、实施、规格同步与归档 |
+| `openspec/specs/` | 仓库维护者 | 当前生效的框架行为规格 |
+| `openspec/changes/` | 仓库维护者 | 进行中的变更；已完成的方案、计划和任务归档于 `openspec/changes/archive/` |
+| `video-production-pipeline.html` | 所有读者 | 框架流程的图形化说明 |
+| `README.md` | 所有读者 | 项目介绍、快速开始、仓库结构和维护边界 |
+| `.gitignore` | 仓库维护者 | 忽略本地凭据、缓存、临时文件和可再生输出；不忽略正式项目资料 |
 
 ## 关键生产原则
 
@@ -81,6 +117,7 @@
 
 | 日期 | 版本 | 归档变更 | 摘要 |
 |---|---|---|---|
+| 2026-10-18 | `v1.1.0` | `add-structured-production-validation` | 新增可选结构化生产记录、Schema 与本地关联校验器，明确机器门禁和人工审核边界。 |
 | 2026-10-18 | `v1.0.0` | `generalize-video-production-pipeline` | 建立项目无关的视频生产框架，补齐背景采集、生产工作流、项目档案治理和质量门禁。 |
 
 每次归档发布前更新此记录；只写简短、可公开的变更摘要，完整方案和任务以 `openspec/changes/archive/` 中的归档为准。

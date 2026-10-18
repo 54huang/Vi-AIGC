@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(profile|brief|claim|asset|shot|review|release)_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^profile_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "valid_from": {
+          "$ref": "#/$defs/date"
+        },
+        "valid_until": {
+          "$ref": "#/$defs/date"
+        }
+      }
+    }
+  },
+  "$id": "https://example.invalid/video-production/review.schema.json",
+  "title": "review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "schema_version",
+    "record_type",
+    "status",
+    "review_type",
+    "target",
+    "reviewer",
+    "reviewed_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^review_[a-z0-9][a-z0-9-]{1,62}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_type": {
+      "const": "Review"
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "needs_revision"
+      ]
+    },
+    "review_type": {
+      "enum": [
+        "factuality",
+        "rights",
+        "creative",
+        "compliance",
+        "release"
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "version"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "VideoBrief",
+            "Claim",
+            "Asset",
+            "Shot",
+            "Release"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^(profile|brief|claim|asset|shot|review|release)_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewed_at": {
+      "$ref": "#/$defs/date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+record_type: Claim
+id: not-a-claim-id
+version: 1.0.0
+schema_version: 1.0.0
+status: confirmed
+text: x
+sources: []
+scope: {}

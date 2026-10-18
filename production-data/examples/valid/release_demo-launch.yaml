@@ -1,0 +1,22 @@
+record_type: Release
+id: release_demo-launch
+version: 1.0.0
+schema_version: 1.0.0
+status: draft
+brief:
+  id: brief_demo-launch
+  version: 1.0.0
+shot_versions:
+- id: shot_demo-opening
+  version: 1.0.0
+asset_refs:
+- id: asset_demo-product
+  version: 1.0.0
+required_review_refs:
+- review_demo-brief-factuality
+- review_demo-brief-compliance
+- review_demo-shot-creative
+- review_demo-asset-rights
+- review_demo-release
+release_date: '2026-11-20'
+description: 机器 PASS 不会把此记录由 draft 改为 approved/published。

@@ -1,0 +1,16 @@
+record_type: Shot
+id: shot_demo-opening
+version: 1.0.0
+schema_version: 1.0.0
+status: planned
+brief:
+  id: brief_demo-launch
+  version: 1.0.0
+claim_ids:
+- claim_demo-feature
+asset_refs:
+- id: asset_demo-product
+  version: 1.0.0
+review_refs:
+- review_demo-shot-creative
+description: 产品亮相并呈现功能。

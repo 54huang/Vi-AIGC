@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(profile|brief|claim|asset|shot|review|release)_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^profile_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "valid_from": {
+          "$ref": "#/$defs/date"
+        },
+        "valid_until": {
+          "$ref": "#/$defs/date"
+        }
+      }
+    }
+  },
+  "$id": "https://example.invalid/video-production/release.schema.json",
+  "title": "release",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "schema_version",
+    "record_type",
+    "status",
+    "brief",
+    "shot_versions",
+    "asset_refs",
+    "required_review_refs",
+    "release_date"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^release_[a-z0-9][a-z0-9-]{1,62}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_type": {
+      "const": "Release"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_review",
+        "approved",
+        "published",
+        "blocked"
+      ]
+    },
+    "brief": {
+      "$ref": "#/$defs/ref"
+    },
+    "shot_versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(profile|brief|claim|asset|shot|review|release)_[a-z0-9][a-z0-9-]{1,62}$"
+          },
+          "version": {
+            "$ref": "#/$defs/version"
+          }
+        }
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "asset_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ref"
+      },
+      "uniqueItems": true
+    },
+    "required_review_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(profile|brief|claim|asset|shot|review|release)_[a-z0-9][a-z0-9-]{1,62}$"
+      },
+      "uniqueItems": true
+    },
+    "release_date": {
+      "$ref": "#/$defs/date"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(profile|brief|claim|asset|shot|review|release)_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^profile_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "valid_from": {
+          "$ref": "#/$defs/date"
+        },
+        "valid_until": {
+          "$ref": "#/$defs/date"
+        }
+      }
+    }
+  },
+  "$id": "https://example.invalid/video-production/claim.schema.json",
+  "title": "claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "schema_version",
+    "record_type",
+    "status",
+    "text",
+    "sources",
+    "scope"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^claim_[a-z0-9][a-z0-9-]{1,62}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_type": {
+      "const": "Claim"
+    },
+    "status": {
+      "enum": [
+        "confirmed",
+        "pending",
+        "expired",
+        "rejected"
+      ]
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locator"
+        ],
+        "properties": {
+          "locator": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_at": {
+            "$ref": "#/$defs/date"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "scope": {
+      "$ref": "#/$defs/scope"
+    },
+    "confirmed_by": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}

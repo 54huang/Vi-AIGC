@@ -1,0 +1,8 @@
+record_type: Claim
+id: claim_bad-enum
+version: 1.0.0
+schema_version: 1.0.0
+status: probably-ok
+text: x
+sources: []
+scope: {}

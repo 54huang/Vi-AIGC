@@ -1,0 +1,13 @@
+record_type: Claim
+id: claim_bad-expired
+version: 1.0.0
+schema_version: 1.0.0
+status: expired
+text: 过期主张
+sources:
+- locator: source
+scope:
+  project_id: profile_demo
+  channels:
+  - youtube
+  valid_until: '2026-01-01'
