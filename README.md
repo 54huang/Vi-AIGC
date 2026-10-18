@@ -4,7 +4,7 @@
 
 本仓库维护一套面向 AI 辅助视频制作的**项目无关框架**：从项目背景采集、事实与素材授权核验，到选题、脚本、镜头、声音、参考资产、预演、成片验收和复盘。它帮助创作者稳定地产出可执行的视频方案，并降低反复沟通、返工和素材漂移。
 
-**当前版本：** `v1.1.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
+**当前版本：** `v1.1.1`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
 
 ## 这是什么 / 不是什么
 
@@ -42,6 +42,88 @@
 3. 提交本条任务需求：目标、目标观众、观众问题、单一核心结论、时长/平台（如已知）、素材/音乐、资源边界及所需交付物。
 4. 按[生产工作流与质量门禁](.agents/skills/video-production-pipeline/references/production-workflow.md)逐阶段推进。先确认脚本和低成本预演，再批量生成；按反馈只返修受影响的部分。可选采用结构化记录时，先读 [`production-data/README.md`](production-data/README.md)，并依[迁移指南](production-data/MIGRATION.md)试点。
 5. **仅仓库维护者需要：** 修改生产框架或规范时，使用 OPSX Skills 建立变更方案、实施、同步规格并归档；归档后的版本、提交和推送遵循[归档发布规则](.agents/skills/openspec-archive-change/SKILL.md)。普通视频制作不依赖 OPSX。
+
+## 克隆、使用与 DIY / 贡献指南
+
+本仓库既可以直接作为视频生产方法库使用，也可以 fork 后按 OpenSpec 流程修改并维护自己的版本。推荐用 fork + 分支 + Pull Request，避免把个人定制、项目资料或未审查的改动直接推到上游。
+
+### 1. 克隆到本地
+
+只想阅读或使用生产流程时，可直接克隆上游：
+
+```bash
+git clone https://github.com/54huang/Vi-AIGC.git
+cd Vi-AIGC
+```
+
+要长期 DIY 或准备贡献代码，先在 GitHub 上 fork 本仓库，再克隆你自己的 fork：
+
+```bash
+git clone https://github.com/<你的 GitHub 用户名>/Vi-AIGC.git
+cd Vi-AIGC
+git remote add upstream https://github.com/54huang/Vi-AIGC.git
+git remote -v
+```
+
+确认 `origin` 指向自己的 fork、`upstream` 指向本项目上游；需要更新时先在 GitHub 同步 fork，再拉取已同步的默认分支并从它创建工作分支（以下以 `main` 为例）：
+
+```bash
+git switch main
+git pull origin main
+git switch -c docs/my-change
+```
+
+开始前运行 `git status --short --branch`，确认当前分支和工作区，先提交或妥善保留自己的改动，不要用 `reset --hard`、强制覆盖或清理命令处理未知文件。
+
+### 2. 在 Codex 中使用仓库 Skills
+
+用 Codex 打开**仓库根目录**。本仓库已包含视频生产 Skill 和 OpenSpec/OPSX 工作流 Skills，通常无需把它们复制到个人全局目录：
+
+- 做视频 Brief、脚本、分镜或质量检查：调用 `$video-production-pipeline`。
+- 讨论问题和选项、不直接实现：调用 `$openspec-explore`。
+- 建立有范围、规格和任务清单的变更：调用 `$openspec-propose`。
+- 调整已有变更方案：调用 `$openspec-update-change`。
+- 按已确认任务实施：调用 `$openspec-apply-change`。
+- 将变更规格同步到主规格：调用 `$openspec-sync-specs`。
+- 完成检查后归档：调用 `$openspec-archive-change`。
+
+这些是 Codex 对话中的 Skill 调用，不是 PowerShell、Bash 或命令提示符里的终端命令。终端执行的是 `openspec ...` CLI 命令。本仓库提供的是上面列出的细分 Skills；单独的 `$opsx` 路由器不包含在仓库内，除非你的 Agent 环境另行安装了它，否则直接调用对应的 `$openspec-*` Skill。不同 Agent 对仓库级 `.agents/skills/` 的发现和调用方式可能不同；若 Skill 未自动出现，先确认已在仓库根目录打开项目，并按所用工具的官方说明配置/刷新 Skills。不要因为未发现 Skill 就盲目重新初始化或覆盖现有配置。
+
+使用 OpenSpec CLI 前，按[官方安装说明](https://github.com/Fission-AI/OpenSpec/blob/main/docs/installation.md)检查运行环境并安装；例如使用 npm：
+
+```bash
+npm install -g @fission-ai/openspec@latest
+openspec --version
+```
+
+若要运行 `production-data/` 的验证器和测试，另安装项目依赖：`python -m pip install -r production-data/requirements.txt`。
+
+本仓库已经初始化 OpenSpec，并将 `openspec/config.yaml`、`openspec/specs/`、`openspec/changes/` 和工作流 Skills 纳入版本管理。**克隆后通常不需要再次运行 `openspec init`。** 若要为其他 Agent 增加集成，先读官方说明，在干净分支上按对应工具步骤操作；升级 CLI 或刷新 OpenSpec 生成文件前，检查工作区并审阅全部 diff，避免无意改写仓库中已有的配置和工作流。
+
+### 3. 用有边界的流程修改
+
+对生产框架、共用 Skill、模板、质量门禁或结构化记录契约的改进，建议按以下顺序进行：
+
+1. **先划范围。** 建立自己的分支；说明要解决的问题、涉及使用者、预期行为、明确不改的内容和验收方式。项目自己的品牌事实、提示词或制作资料优先放在项目自己的档案，不要写入通用生产框架。
+2. **先探索/提案，不要直接改。** 不确定方案时先用 `$openspec-explore`；确认要做后用 `$openspec-propose <简短变更名>`。检查生成的 `proposal.md`、delta spec、`design.md` 与 `tasks.md`，确认范围、需求和验收条件准确；需要调整就用 `$openspec-update-change`。提案未确认前不要开始实现。
+3. **按任务实施。** 用 `$openspec-apply-change` 执行已确认的任务。每项完成后再勾选任务；需求、范围或验收标准变化时先更新方案，不要为了让校验通过而编造资料、放宽门禁或悄悄删掉未完成任务。
+4. **验证后再同步/归档。** 运行变更要求的测试和 `openspec validate --all --strict`。若变更含 delta spec，先用 `$openspec-sync-specs` 同步并核对主规格；只有相关任务和验证完成后才用 `$openspec-archive-change`。纯文档变更是否需要规格由实际影响决定，不要为了归档而制造无关规格。
+5. **先确认发布目标，再提交/推送。** 本仓库的归档 Skill 还包含版本提交、annotated tag 和推送规则。归档前确认 `git remote -v` 中的 `origin` 是你有权限的 fork，而不是上游；确认分支、工作区、版本号和标签均无冲突，再审阅归档 Skill 将执行的发布步骤。不要强推、移动已发布标签或提交密钥、客户资料和未经授权的素材。准备贡献上游时，通过 Pull Request 提交，由维护者审查。
+
+常用本地检查（如本次改动适用）：
+
+```bash
+openspec status --change <变更名> --json
+openspec validate --all --strict
+python -m unittest discover -s production-data/tests -v
+python production-data/scripts/validate_video_package.py production-data/examples/valid
+```
+
+按改动类型运行适用检查即可；验证器的机器 `PASS` 只代表确定性结构/关联规则通过，不代表内容事实、素材权利、审美或法规审查通过。提交前检查 `git diff --check`、`git status --short --branch` 和完整 diff，只提交本次变更相关文件。
+
+### 4. 同步上游与提交贡献
+
+准备向上游贡献时，确认工作已提交到自己 fork 的主题分支，并在 GitHub 创建 Pull Request；在描述中写明变更背景、范围、验证命令和未解决事项。同步上游前也先保存工作区，再获取并审阅 `upstream` 的更新；不要把自己的未提交改动与上游更新混在一起。完整的 OpenSpec / Codex Skill 用法会随工具版本变化，可查阅 [OpenSpec 官方文档](https://github.com/Fission-AI/OpenSpec/tree/main/docs) 与 [Codex Skills 说明](https://developers.openai.com/codex/skills)。
 
 也可以先查看[项目框架可视化说明](video-production-pipeline.html)。
 
@@ -118,6 +200,7 @@
 | 日期 | 版本 | 归档变更 | 摘要 |
 |---|---|---|---|
 | 2026-10-18 | `v1.1.0` | `add-structured-production-validation` | 新增可选结构化生产记录、Schema 与本地关联校验器，明确机器门禁和人工审核边界。 |
+| 2026-10-18 | —（文档维护，未发布） | dd-repository-onboarding-and-html-sync | 补充克隆、Skills、OPSX DIY/贡献指南，并建立生产框架变更时核对/同步 HTML 的 Agent 规则。 |
 | 2026-10-18 | `v1.0.0` | `generalize-video-production-pipeline` | 建立项目无关的视频生产框架，补齐背景采集、生产工作流、项目档案治理和质量门禁。 |
 
 每次归档发布前更新此记录；只写简短、可公开的变更摘要，完整方案和任务以 `openspec/changes/archive/` 中的归档为准。
