@@ -1,0 +1,3 @@
+interface:
+  display_name: "Video Production Pipeline"
+  short_description: "Reusable cross-project video production workflow"
