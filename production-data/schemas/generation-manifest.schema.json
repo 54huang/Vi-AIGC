@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "hash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "digest"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "assetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^asset_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "entityRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(shot|release)_[a-z0-9][a-z0-9-]{1,62}$"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    }
+  },
+  "$id": "https://example.invalid/video-production/generation-manifest.schema.json",
+  "title": "GenerationManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "schema_version",
+    "record_type",
+    "created_at",
+    "inputs",
+    "outputs",
+    "model",
+    "workflow",
+    "parameters",
+    "execution_status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^manifest_[a-z0-9][a-z0-9-]{1,62}$"
+    },
+    "version": {
+      "$ref": "#/$defs/version"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_type": {
+      "const": "GenerationManifest"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assetRef"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/assetRef"
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "revision",
+        "weights_rights"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_id": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_card_uri": {
+          "type": "string"
+        },
+        "model_card_revision": {
+          "type": "string"
+        },
+        "weights_license": {
+          "type": "string"
+        },
+        "weights_rights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "unknown",
+                "unverified",
+                "verified",
+                "restricted",
+                "expired",
+                "revoked"
+              ]
+            },
+            "basis": {
+              "type": "string"
+            },
+            "source_uri": {
+              "type": "string"
+            },
+            "valid_until": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_or_hash"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version_or_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_template_id": {
+          "type": "string"
+        },
+        "prompt_template_version_or_hash": {
+          "type": "string"
+        },
+        "prompt_ref": {
+          "type": "string"
+        },
+        "code_license": {
+          "type": "string"
+        }
+      }
+    },
+    "parameters": {
+      "type": "object"
+    },
+    "execution_status": {
+      "enum": [
+        "succeeded",
+        "failed",
+        "partial"
+      ]
+    },
+    "tool_version": {
+      "type": "string"
+    },
+    "gate_run_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ref"
+      },
+      "uniqueItems": true
+    },
+    "review_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ref"
+      },
+      "uniqueItems": true
+    },
+    "shot_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entityRef"
+      },
+      "uniqueItems": true
+    },
+    "previous_manifest_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "change_summary": {
+      "type": "string"
+    },
+    "release_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entityRef"
+      },
+      "uniqueItems": true
+    }
+  }
+}

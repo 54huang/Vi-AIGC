@@ -1,0 +1,19 @@
+id: asset_source-demo
+version: 1.0.0
+schema_version: 1.0.0
+record_type: Asset
+status: cleared
+uri: asset_demo-product.png
+usage_scope: {}
+rights:
+  input_media:
+    status: verified
+    basis: 示例：自有素材
+    holder: 示例项目
+    scope:
+      commercial: 'yes'
+      channels:
+      - youtube
+source:
+  provider: 示例项目自有素材库
+  uri: https://example.invalid/demo/source

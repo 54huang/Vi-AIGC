@@ -1,0 +1,12 @@
+record_type: Review
+id: review_demo-release
+version: 1.0.0
+schema_version: 1.0.0
+status: approved
+review_type: release
+target:
+  type: Release
+  id: release_demo-launch
+  version: 1.0.0
+reviewer: 示例发布审查人
+reviewed_at: '2026-10-18'

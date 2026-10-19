@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    }
+  },
+  "$id": "https://example.invalid/video-production/gate-run.schema.json",
+  "title": "GateRun",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "schema_version",
+    "record_type",
+    "checklist_ref",
+    "check_id",
+    "rule_version",
+    "target",
+    "status",
+    "evidence",
+    "owner",
+    "checked_at",
+    "checker_type",
+    "tool_version",
+    "configuration_version",
+    "dependency_refs"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^gate-run_[a-z0-9][a-z0-9-]{1,62}$"
+    },
+    "version": {
+      "$ref": "#/$defs/version"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_type": {
+      "const": "GateRun"
+    },
+    "checklist_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "check_id": {
+      "type": "string"
+    },
+    "rule_version": {
+      "$ref": "#/$defs/version"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "version"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "ProjectProfile",
+            "VideoBrief",
+            "Claim",
+            "Asset",
+            "Shot",
+            "Review",
+            "Release"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "fail",
+        "blocked",
+        "not-applicable"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "description"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uri": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "measured_value": {},
+          "expected_value": {}
+        }
+      },
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checker_type": {
+      "enum": [
+        "automated",
+        "human"
+      ]
+    },
+    "tool_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "configuration_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "na_reason": {
+      "type": "string"
+    },
+    "na_authorized_by": {
+      "type": "string"
+    },
+    "diagnostic": {
+      "type": "string"
+    },
+    "supersedes": {
+      "$ref": "#/$defs/ref"
+    },
+    "dependency_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ref"
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "pass"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "not-applicable"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "na_reason",
+          "na_authorized_by"
+        ]
+      }
+    }
+  ]
+}

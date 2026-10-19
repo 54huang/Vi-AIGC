@@ -1,0 +1,44 @@
+id: manifest_demo-generation
+version: 1.0.0
+schema_version: 1.0.0
+record_type: GenerationManifest
+created_at: '2026-10-18T09:15:00Z'
+inputs:
+- id: asset_source-demo
+  version: 1.0.0
+outputs:
+- id: asset_generated-demo
+  version: 1.0.0
+model:
+  provider: example-local
+  model_id: demo-model
+  revision: sha256:demo-revision
+  weights_rights:
+    status: verified
+    basis: 示例权重许可已人工核对
+  model_card_uri: https://huggingface.co/docs/hub/main/model-cards
+  model_card_revision: reviewed-2026-10-18
+workflow:
+  id: demo-workflow
+  version_or_hash: 1.0.0
+  prompt_template_id: demo-template
+  prompt_template_version_or_hash: sha256:example
+  prompt_ref: vault://example/prompts/demo
+  code_license: MIT
+parameters:
+  seed: 42
+  steps: 20
+execution_status: succeeded
+tool_version: demo-runner-1
+gate_run_refs:
+- id: gate-run_g0-demo
+  version: 1.0.0
+shot_refs:
+- id: shot_demo-opening
+  version: 1.0.0
+release_refs:
+- id: release_demo-launch
+  version: 1.0.0
+review_refs:
+- id: review_demo-generated-rights
+  version: 1.0.0

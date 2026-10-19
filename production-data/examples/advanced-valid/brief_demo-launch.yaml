@@ -1,0 +1,15 @@
+record_type: VideoBrief
+id: brief_demo-launch
+version: 1.0.0
+schema_version: 1.0.0
+status: in_review
+project_profile:
+  id: profile_demo
+  version: 1.0.0
+channel: youtube
+planned_release_date: '2026-11-20'
+claim_ids:
+- claim_demo-feature
+shot_ids:
+- shot_demo-opening
+title: 示例产品介绍

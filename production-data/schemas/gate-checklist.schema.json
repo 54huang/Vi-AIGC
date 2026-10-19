@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    }
+  },
+  "$id": "https://example.invalid/video-production/gate-checklist.schema.json",
+  "title": "GateChecklist",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "schema_version",
+    "record_type",
+    "stage",
+    "checks"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^gate_[a-z0-9][a-z0-9-]{1,62}$"
+    },
+    "version": {
+      "$ref": "#/$defs/version"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_type": {
+      "const": "GateChecklist"
+    },
+    "stage": {
+      "enum": [
+        "G0",
+        "G1",
+        "G2",
+        "G3",
+        "G4"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "check_id",
+          "rule_version",
+          "description",
+          "checker_type",
+          "required",
+          "blocking",
+          "allow_not_applicable"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]+$"
+          },
+          "rule_version": {
+            "$ref": "#/$defs/version"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "checker_type": {
+            "enum": [
+              "automated",
+              "human"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "blocking": {
+            "type": "boolean"
+          },
+          "allow_not_applicable": {
+            "type": "boolean"
+          },
+          "configuration_ref": {
+            "type": "string"
+          },
+          "dependency_refs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ref"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "uniqueItems": true
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}

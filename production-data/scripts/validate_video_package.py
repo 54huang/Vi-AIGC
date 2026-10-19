@@ -9,8 +9,8 @@ import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 
 SCHEMA_VERSION='1.0.0'
-TYPE_TO_SCHEMA={'ProjectProfile':'project-profile','VideoBrief':'video-brief','Claim':'claim','Asset':'asset','Shot':'shot','Review':'review','Release':'release'}
-PREFIX={'ProjectProfile':'profile','VideoBrief':'brief','Claim':'claim','Asset':'asset','Shot':'shot','Review':'review','Release':'release'}
+TYPE_TO_SCHEMA={'ProjectProfile':'project-profile','VideoBrief':'video-brief','Claim':'claim','Asset':'asset','Shot':'shot','Review':'review','Release':'release','GateChecklist':'gate-checklist','GateRun':'gate-run','GenerationManifest':'generation-manifest'}
+PREFIX={'ProjectProfile':'profile','VideoBrief':'brief','Claim':'claim','Asset':'asset','Shot':'shot','Review':'review','Release':'release','GateChecklist':'gate','GateRun':'gate-run','GenerationManifest':'manifest'}
 
 def validate(package: Path, schema_dir: Path):
     findings=[]; records=[]
@@ -68,6 +68,67 @@ def validate(package: Path, schema_dir: Path):
             if r['status'] in ('expired','revoked'): add('ERROR',rid,'status',f'Asset 状态为 {r["status"]}',None,'确认当前授权状态或换用素材')
             elif r['status']=='unverified': add('WARN',rid,'status','Asset 权限未核验',None,'由责任人核验素材权利')
             if r.get('rights_ambiguity'): add('WARN',rid,'rights_ambiguity','授权依据含糊，需人工复核；字段存在不代表授权充分',None,'由权利/法务责任人审阅授权依据')
+        elif typ=='GateChecklist':
+            check_ids=[x['check_id'] for x in r['checks']]
+            if len(check_ids)!=len(set(check_ids)): add('ERROR',rid,'checks','检查清单包含重复 check_id',None,'确保每个检查项 ID 唯一')
+        elif typ=='GateRun':
+            checklist=resolve(r['checklist_ref']['id'],r['checklist_ref']['version'],'checklist_ref',['GateChecklist'],rid)
+            if checklist:
+                check=next((x for x in checklist['checks'] if x['check_id']==r['check_id']),None)
+                if not check: add('ERROR',rid,'check_id',f'检查项 {r["check_id"]} 不存在于清单 {checklist["id"]}@{checklist["version"]}',r['check_id'],'引用清单中定义的检查项')
+                else:
+                    if check['rule_version']!=r['rule_version']: add('ERROR',rid,'rule_version','GateRun 规则版本与清单定义不一致',r['check_id'],'使用清单定义的规则版本并重新检查')
+                    if check['checker_type']!=r['checker_type']: add('ERROR',rid,'checker_type','检查执行类型与清单定义不一致',r['check_id'],'按清单声明由自动工具或人工执行')
+                    if check.get('configuration_ref') and check['configuration_ref']!=r['configuration_version']: add('ERROR',rid,'configuration_version','GateRun 配置版本与清单要求不一致',r['check_id'],'按当前配置重新执行检查')
+                    expected_deps={(x['id'],x['version']) for x in check.get('dependency_refs',[])}
+                    actual_deps={(x['id'],x['version']) for x in r.get('dependency_refs',[])}
+                    if expected_deps and expected_deps!=actual_deps: add('ERROR',rid,'dependency_refs','GateRun 依赖版本与清单声明不一致',r['check_id'],'更新依赖引用并重跑该门禁')
+                    if r['status']=='not-applicable' and not check['allow_not_applicable']: add('ERROR',rid,'status','该检查项不允许 not-applicable 豁免',r['check_id'],'完成检查，不得通过豁免绕过门禁')
+                    if check['required'] and r['status'] in ('fail','blocked'): add('ERROR',rid,'status',f'必需门禁项状态为 {r["status"]}',r['check_id'],'处理阻断或失败后重跑检查')
+            resolve(r['target']['id'],r['target']['version'],'target',['ProjectProfile','VideoBrief','Claim','Asset','Shot','Review','Release'],rid)
+            for ref in r.get('dependency_refs',[]): resolve(ref['id'],ref['version'],'dependency_refs',list(TYPE_TO_SCHEMA),rid)
+            if r['status']=='blocked': add('ERROR',rid,'status','门禁状态 blocked，不可作为通过证据',r['check_id'],'补齐前提后重新运行检查')
+        elif typ=='GenerationManifest':
+            # A manifest activates strict provenance checks; legacy Assets without manifests remain compatible.
+            model_rights=r['model'].get('weights_rights',{})
+            if model_rights.get('status')!='verified': add('ERROR',rid,'model.weights_rights','模型权重权利缺失或未核验',r['model'].get('model_id'),'记录权重许可并由责任人核验')
+            if model_rights.get('valid_until') and date.fromisoformat(model_rights['valid_until'])<date.today(): add('ERROR',rid,'model.weights_rights.valid_until','模型权重权利记录已过期',r['model'].get('model_id'),'更新权利凭证并重新核验')
+            for iref in r['inputs']:
+                asset=resolve(iref['id'],iref['version'],'inputs',['Asset'],rid)
+                if asset:
+                    rights=asset.get('rights',{}).get('input_media')
+                    source=asset.get('source',{})
+                    if not source.get('provider') and not source.get('uri'): add('ERROR',rid,'inputs',f'输入素材 {asset["id"]}@{asset["version"]} 缺少来源定位',asset['id'],'记录来源提供方或原始 URI')
+                    if not rights or rights.get('status')!='verified': add('ERROR',rid,'inputs',f'输入素材 {asset["id"]}@{asset["version"]} 权利记录缺失或未核验',asset['id'],'补充输入素材权利记录并由责任人核验')
+                    if rights and rights.get('valid_until') and date.fromisoformat(rights['valid_until'])<date.today(): add('ERROR',rid,'inputs',f'输入素材 {asset["id"]} 权利记录已过期',asset['id'],'更新权利凭证并重新核验')
+            for oref in r['outputs']:
+                asset=resolve(oref['id'],oref['version'],'outputs',['Asset'],rid)
+                if asset:
+                    if r['id'] not in [x['id'] for x in asset.get('manifest_refs',[])]: add('ERROR',rid,'outputs',f'输出 Asset {asset["id"]} 未反向引用本 Manifest',asset['id'],'在 Asset.manifest_refs 中添加精确 manifest 引用')
+                    h=asset.get('content_hash')
+                    if not h: add('ERROR',rid,'outputs',f'输出 Asset {asset["id"]} 缺少文件哈希',asset['id'],'记录输出文件 SHA-256')
+                    elif not asset['uri'].startswith(('http://','https://','s3://')):
+                        path=(package/asset['uri']).resolve()
+                        if path.exists() and path.is_file():
+                            import hashlib
+                            actual=hashlib.sha256(path.read_bytes()).hexdigest()
+                            if actual!=h['digest']: add('ERROR',rid,'outputs',f'输出 Asset {asset["id"]} 文件哈希不匹配',asset['uri'],'重新登记正确文件或哈希')
+                        else: add('ERROR',rid,'outputs',f'输出 Asset 文件不存在：{asset["uri"]}',asset['uri'],'恢复文件或修正项目相对路径')
+                    output_rights=asset.get('rights',{}).get('output_use')
+                    if not output_rights or output_rights.get('status')!='verified': add('ERROR',rid,'outputs',f'输出 Asset {asset["id"]} 的输出使用权利未核验',asset['id'],'由责任人核验输出使用条件')
+            for ref in r.get('review_refs',[]): resolve(ref['id'],ref['version'],'review_refs',['Review'],rid)
+            for ref in r.get('gate_run_refs',[]): resolve(ref['id'],ref['version'],'gate_run_refs',['GateRun'],rid)
+            declared_shots={(x['id'],x['version']) for x in r.get('shot_refs',[])}
+            declared_releases={(x['id'],x['version']) for x in r.get('release_refs',[])}
+            for ref in r.get('shot_refs',[]): resolve(ref['id'],ref['version'],'shot_refs',['Shot'],rid)
+            for ref in r.get('release_refs',[]): resolve(ref['id'],ref['version'],'release_refs',['Release'],rid)
+            output_keys={(x['id'],x['version']) for x in r['outputs']}
+            downstream_shots=[x for x in records if x['record_type']=='Shot' and any((a['id'],a['version']) in output_keys for a in x['asset_refs'])]
+            for shot in downstream_shots:
+                if (shot['id'],shot['version']) not in declared_shots: add('ERROR',rid,'shot_refs',f'下游 Shot {shot["id"]}@{shot["version"]} 未被 Manifest 反向记录',shot['id'],'将使用该输出资产的精确 Shot 版本加入 shot_refs')
+            downstream_releases=[x for x in records if x['record_type']=='Release' and any((sh['id'],sh['version']) in {(z['id'],z['version']) for z in x['shot_versions']} for sh in downstream_shots)]
+            for release in downstream_releases:
+                if (release['id'],release['version']) not in declared_releases: add('ERROR',rid,'release_refs',f'下游 Release {release["id"]}@{release["version"]} 未被 Manifest 反向记录',release['id'],'将使用该输出资产的精确 Release 版本加入 release_refs')
         elif typ=='Shot':
             bref=r['brief']; brief=resolve(bref['id'],bref['version'],'brief',['VideoBrief'],rid)
             if brief:
@@ -128,6 +189,13 @@ def validate(package: Path, schema_dir: Path):
                         match=next((x for x in supplied if x['review_type']==rt and x['target']['type']==tid and x['target']['id']==tv and x['target']['version']==v),None)
                         if not match: add('ERROR',rid,'required_review_refs',f'缺少规则要求的 {rt} Review：{tid} {tv}@{v}',f'{tid} {tv}@{v}','补充绑定精确对象版本的人工审查记录；不可由 Release 自行省略')
         # Cross-check scope dates for all Claims used by Brief or Shot.
+    # Validate manifest inverse references and complete release ancestry.
+    for m in records:
+        if m['record_type']!='GenerationManifest': continue
+        for aref in m['outputs']:
+            a=resolve(aref['id'],aref['version'],'outputs',['Asset'],m['id'])
+            if a and not any(x['id']==m['id'] and x['version']==m['version'] for x in a.get('manifest_refs',[])):
+                add('ERROR',m['id'],'outputs',f'输出 Asset {a["id"]}@{a["version"]} 缺少指回本 Manifest 的关联',a['id'],'补充 manifest_refs 并保留版本化来源链')
     # Validate Brief indexes and profile-owned record indexes.
     for r in records:
         if r['record_type']=='VideoBrief':
@@ -167,7 +235,7 @@ def main():
     if errors: print(f'ERROR: {errors} 个阻断问题，{warns} 个警告，检查 {len(records)} 条记录。')
     elif warns: print(f'WARN: 无确定性阻断；{warns} 项需人工复核，检查 {len(records)} 条记录。')
     else: print(f'PASS: {len(records)} 条记录通过确定性检查；机器 PASS 不改变人工 Review 状态或发布状态。')
-    print(f'检查器版本：1.0.0；Schema 版本：{SCHEMA_VERSION}；记录 schema_version: {", ".join(sorted({r.get("schema_version","?") for r in records})) or "无"}')
+    print(f'检查器版本：1.1.0；Schema 版本：{SCHEMA_VERSION}；记录 schema_version: {", ".join(sorted({r.get("schema_version","?") for r in records})) or "无"}')
     print('注意：记录一致性通过不证明主张真实、素材权利充分、内容适当或符合任何法律/平台政策。')
     return 1 if errors else (2 if warns else 0)
 if __name__=='__main__': raise SystemExit(main())

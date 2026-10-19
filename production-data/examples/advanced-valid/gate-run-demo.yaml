@@ -1,0 +1,23 @@
+id: gate-run_g0-demo
+version: 1.0.0
+schema_version: 1.0.0
+record_type: GateRun
+checklist_ref:
+  id: gate_g0-demo
+  version: 1.0.0
+check_id: brief-scope
+rule_version: 1.0.0
+target:
+  type: ProjectProfile
+  id: profile_demo
+  version: 1.0.0
+status: pass
+evidence:
+- description: 示例 Brief 已记录受众和交付目标
+  uri: brief_demo-launch.yaml
+owner: 示例制作负责人
+checked_at: '2026-10-18T09:00:00Z'
+checker_type: human
+tool_version: manual-review-1
+configuration_version: project-gate-config-1.0.0
+dependency_refs: []

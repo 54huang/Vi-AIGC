@@ -1,0 +1,13 @@
+id: gate_g0-demo
+version: 1.0.0
+schema_version: 1.0.0
+record_type: GateChecklist
+stage: G0
+checks:
+- check_id: brief-scope
+  rule_version: 1.0.0
+  description: 目标受众与交付范围已在 Brief 中记录
+  checker_type: human
+  required: true
+  blocking: true
+  allow_not_applicable: false

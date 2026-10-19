@@ -1,0 +1,19 @@
+id: asset_generated-demo
+version: 1.0.0
+schema_version: 1.0.0
+record_type: Asset
+status: cleared
+uri: generated-demo.txt
+usage_scope: {}
+rights:
+  output_use:
+    status: verified
+    basis: 示例：人工确认使用条件
+    scope:
+      commercial: reviewed
+content_hash:
+  algorithm: sha256
+  digest: 7bbe784d9a532aaae6ae2c79d6732fc6a8447de303be7c837a4512d20cced899
+manifest_refs:
+- id: manifest_demo-generation
+  version: 1.0.0

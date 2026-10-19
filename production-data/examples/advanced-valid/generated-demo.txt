@@ -1,0 +1,1 @@
+Synthetic generated asset fixture for provenance schema validation.

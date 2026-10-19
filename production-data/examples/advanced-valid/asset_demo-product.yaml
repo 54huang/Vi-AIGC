@@ -1,0 +1,14 @@
+record_type: Asset
+id: asset_demo-product
+version: 1.0.0
+schema_version: 1.0.0
+status: cleared
+uri: assets/product.png
+usage_scope:
+  project_id: profile_demo
+  channels:
+  - youtube
+  valid_from: '2026-01-01'
+  valid_until: '2026-12-31'
+rights_basis: 示例：已记录的内部授权依据
+rights_ambiguity: false

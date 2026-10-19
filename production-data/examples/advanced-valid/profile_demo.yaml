@@ -1,0 +1,22 @@
+record_type: ProjectProfile
+id: profile_demo
+version: 1.0.0
+schema_version: 1.0.0
+project_name: 示例项目
+status: active
+review_requirements:
+  brief:
+  - factuality
+  - compliance
+  shot:
+  - creative
+  asset:
+  - rights
+  release:
+  - release
+claim_ids:
+- claim_demo-feature
+asset_ids:
+- asset_demo-product
+- asset_generated-demo
+description: 仅用于验证结构与关联，不代表真实项目。

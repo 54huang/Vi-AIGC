@@ -19,7 +19,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^(profile|brief|claim|asset|shot|review|release)_[a-z0-9][a-z0-9-]{1,62}$"
+          "pattern": "^(profile|brief|claim|asset|shot|review|release|gate|gate-run|manifest)_[a-z0-9][a-z0-9-]{1,62}$"
         },
         "version": {
           "$ref": "#/$defs/version"
@@ -47,6 +47,67 @@
         },
         "valid_until": {
           "$ref": "#/$defs/date"
+        }
+      }
+    },
+    "hash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "digest"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "rightsRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "unknown",
+            "unverified",
+            "verified",
+            "restricted",
+            "expired",
+            "revoked"
+          ]
+        },
+        "basis": {
+          "type": "string"
+        },
+        "source_uri": {
+          "type": "string"
+        },
+        "holder": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "array",
+              "null"
+            ]
+          }
+        },
+        "valid_until": {
+          "$ref": "#/$defs/date"
+        },
+        "review_ref": {
+          "$ref": "#/$defs/ref"
         }
       }
     }
@@ -102,6 +163,83 @@
     },
     "description": {
       "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "acquired_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_asset_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/rightsRecord"
+        },
+        "model_weights": {
+          "$ref": "#/$defs/rightsRecord"
+        },
+        "input_media": {
+          "$ref": "#/$defs/rightsRecord"
+        },
+        "output_use": {
+          "$ref": "#/$defs/rightsRecord"
+        }
+      }
+    },
+    "content_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "manifest_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ref"
+      },
+      "uniqueItems": true
+    },
+    "change_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "changed_at",
+          "actor",
+          "change",
+          "previous_version"
+        ],
+        "properties": {
+          "changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "change": {
+            "type": "string",
+            "minLength": 1
+          },
+          "previous_version": {
+            "$ref": "#/$defs/version"
+          }
+        }
+      }
     }
   }
 }

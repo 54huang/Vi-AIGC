@@ -1,0 +1,13 @@
+id: review_demo-generated-rights
+version: 1.0.0
+schema_version: 1.0.0
+record_type: Review
+status: approved
+review_type: rights
+target:
+  type: Asset
+  id: asset_generated-demo
+  version: 1.0.0
+reviewer: 示例权利审查人
+reviewed_at: '2026-10-18'
+notes: 示例：人工核验输出使用条件及输入素材授权链。

@@ -4,7 +4,7 @@
 
 本仓库维护一套面向 AI 辅助视频制作的**项目无关框架**：从项目背景采集、事实与素材授权核验，到选题、脚本、镜头、声音、参考资产、预演、成片验收和复盘。它帮助创作者稳定地产出可执行的视频方案，并降低反复沟通、返工和素材漂移。
 
-**当前版本：** `v1.1.1`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
+**当前版本：** `v1.2.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
 
 ## 这是什么 / 不是什么
 
@@ -117,6 +117,7 @@ openspec status --change <变更名> --json
 openspec validate --all --strict
 python -m unittest discover -s production-data/tests -v
 python production-data/scripts/validate_video_package.py production-data/examples/valid
+python production-data/scripts/validate_video_package.py production-data/examples/advanced-valid
 ```
 
 按改动类型运行适用检查即可；验证器的机器 `PASS` 只代表确定性结构/关联规则通过，不代表内容事实、素材权利、审美或法规审查通过。提交前检查 `git diff --check`、`git status --short --branch` 和完整 diff，只提交本次变更相关文件。
@@ -145,9 +146,9 @@ python production-data/scripts/validate_video_package.py production-data/example
 │   ├── openspec-sync-specs/         # 同步规格
 │   └── openspec-archive-change/     # 验证并归档变更
 ├── production-data/                 # 可选结构化生产记录、Schema 与本地校验器
-│   ├── schemas/                     # 七类记录的结构契约
-│   ├── examples/                    # 完整正例与故意无效的负例
-│   ├── scripts/                     # 本地 YAML/关联校验入口
+│   ├── schemas/                     # 基础记录、G0–G4 门禁、生成溯源与媒体配置契约
+│   ├── examples/                    # 基础/增强正例与故意无效的负例
+│   ├── scripts/                     # 记录校验、门禁汇总与本地媒体测量
 │   ├── tests/                       # 自动化验证
 │   ├── README.md                    # 结构、命令与自动/人工边界
 │   └── MIGRATION.md                 # 并行迁移及回滚说明
@@ -167,7 +168,7 @@ python production-data/scripts/validate_video_package.py production-data/example
 | 路径 | 面向对象 | 用途 |
 |---|---|---|
 | `.agents/skills/video-production-pipeline/` | 视频制作者 | 视频 Brief、脚本、分镜、生成提示词与质量检查 |
-| `production-data/` | 视频制作者（可选） | 项目/Brief/Claim/Asset/Shot/Review/Release 结构化记录、Schema、本地验证器与迁移指南 |
+| `production-data/` | 视频制作者（可选） | 项目/Brief/Claim/Asset/Shot/Review/Release、G0–G4 GateChecklist/GateRun、生成 Manifest、Schema、本地媒体检查和迁移指南 |
 | `.agents/skills/openspec-*/` | 仓库维护者 | OPSX 探索、提案、更新、实施、规格同步与归档 |
 | `openspec/specs/` | 仓库维护者 | 当前生效的框架行为规格 |
 | `openspec/changes/` | 仓库维护者 | 进行中的变更；已完成的方案、计划和任务归档于 `openspec/changes/archive/` |
@@ -199,6 +200,7 @@ python production-data/scripts/validate_video_package.py production-data/example
 
 | 日期 | 版本 | 归档变更 | 摘要 |
 |---|---|---|---|
+| 2026-10-19 | `v1.2.0` | `add-auditable-quality-gates-and-provenance` | 新增可审计的 G0–G4 门禁、生成资产来源与权利追溯，以及可复现的本地媒体检查。 |
 | 2026-10-18 | `v1.1.0` | `add-structured-production-validation` | 新增可选结构化生产记录、Schema 与本地关联校验器，明确机器门禁和人工审核边界。 |
 | 2026-10-18 | —（文档维护，未发布） | dd-repository-onboarding-and-html-sync | 补充克隆、Skills、OPSX DIY/贡献指南，并建立生产框架变更时核对/同步 HTML 的 Agent 规则。 |
 | 2026-10-18 | `v1.0.0` | `generalize-video-production-pipeline` | 建立项目无关的视频生产框架，补齐背景采集、生产工作流、项目档案治理和质量门禁。 |

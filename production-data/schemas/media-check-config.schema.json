@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/video-production/media-check-config.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tool_versions",
+    "duration_tolerance_seconds",
+    "subtitle_min_coverage",
+    "audio_peak_dbfs_max",
+    "specification",
+    "expected_duration_seconds",
+    "frame_rate_tolerance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "tool_versions": {
+      "type": "object",
+      "required": [
+        "ffprobe",
+        "ffmpeg"
+      ],
+      "properties": {
+        "ffprobe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ffmpeg": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "duration_tolerance_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "subtitle_min_coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "audio_peak_dbfs_max": {
+      "type": "number",
+      "maximum": 0
+    },
+    "specification": {
+      "type": "object",
+      "required": [
+        "width",
+        "height",
+        "frame_rate"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "frame_rate": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "container": {
+          "type": "string"
+        },
+        "video_codec": {
+          "type": "string"
+        },
+        "audio_codec": {
+          "type": "string"
+        }
+      }
+    },
+    "expected_duration_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "frame_rate_tolerance": {
+      "type": "number",
+      "minimum": 0
+    },
+    "required_subtitle": {
+      "type": "boolean"
+    },
+    "required_audio": {
+      "type": "boolean"
+    }
+  }
+}

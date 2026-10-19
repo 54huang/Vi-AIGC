@@ -1,0 +1,12 @@
+record_type: Review
+id: review_demo-brief-factuality
+version: 1.0.0
+schema_version: 1.0.0
+status: approved
+review_type: factuality
+target:
+  type: VideoBrief
+  id: brief_demo-launch
+  version: 1.0.0
+reviewer: 示例审查人
+reviewed_at: '2026-10-18'
