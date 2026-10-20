@@ -4,7 +4,7 @@
 
 本仓库维护一套面向 AI 辅助视频制作的**项目无关框架**：从项目背景采集、事实与素材授权核验，到选题、脚本、镜头、声音、参考资产、预演、成片验收和复盘。它帮助创作者稳定地产出可执行的视频方案，并降低反复沟通、返工和素材漂移。
 
-**当前版本：** `v1.2.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
+**当前版本：** `v2.0.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
 
 ## 这是什么 / 不是什么
 
@@ -102,12 +102,12 @@ openspec --version
 
 ### 3. 用有边界的流程修改
 
-对生产框架、共用 Skill、模板、质量门禁或结构化记录契约的改进，建议按以下顺序进行：
+**本仓库任何拟保留的改动，无论大小或文件类型（包括文档、测试、配置及热修），都必须通过 OPSX 变更。** 只读调查与不拟保留的临时构建产物不算仓库改动；不能借此绕开小修。按以下顺序进行：
 
 1. **先划范围。** 建立自己的分支；说明要解决的问题、涉及使用者、预期行为、明确不改的内容和验收方式。项目自己的品牌事实、提示词或制作资料优先放在项目自己的档案，不要写入通用生产框架。
-2. **先探索/提案，不要直接改。** 不确定方案时先用 `$openspec-explore`；确认要做后用 `$openspec-propose <简短变更名>`。检查生成的 `proposal.md`、delta spec、`design.md` 与 `tasks.md`，确认范围、需求和验收条件准确；需要调整就用 `$openspec-update-change`。提案未确认前不要开始实现。
+2. **先探索/提案，不要直接改。** 不确定方案时先用 `$openspec-explore`；确认要做后用 `$openspec-propose <简短变更名>`。检查生成的 `proposal.md`、delta spec、`design.md` 与 `tasks.md`，确认范围、需求和验收条件准确；需要调整就用 `$openspec-update-change`。提案未确认前不要开始实现；propose 只生成方案，必须在后续独立的 apply 请求中实施。
 3. **按任务实施。** 用 `$openspec-apply-change` 执行已确认的任务。每项完成后再勾选任务；需求、范围或验收标准变化时先更新方案，不要为了让校验通过而编造资料、放宽门禁或悄悄删掉未完成任务。
-4. **验证后再同步/归档。** 运行变更要求的测试和 `openspec validate --all --strict`。若变更含 delta spec，先用 `$openspec-sync-specs` 同步并核对主规格；只有相关任务和验证完成后才用 `$openspec-archive-change`。纯文档变更是否需要规格由实际影响决定，不要为了归档而制造无关规格。
+4. **验证后再同步/归档。** 运行变更要求的测试和 `openspec validate --all --strict`。若变更含 delta spec，先用 `$openspec-sync-specs` 同步并核对主规格；只有相关任务和验证完成后才用 `$openspec-archive-change`。纯文档等不改变规格级行为的维护变更仍须走 OPSX，但可明确理由并使用合法的无 delta 变更；不要为了归档而制造无关规格。
 5. **先确认发布目标，再提交/推送。** 本仓库的归档 Skill 还包含版本提交、annotated tag 和推送规则。归档前确认 `git remote -v` 中的 `origin` 是你有权限的 fork，而不是上游；确认分支、工作区、版本号和标签均无冲突，再审阅归档 Skill 将执行的发布步骤。不要强推、移动已发布标签或提交密钥、客户资料和未经授权的素材。准备贡献上游时，通过 Pull Request 提交，由维护者审查。
 
 常用本地检查（如本次改动适用）：
@@ -162,7 +162,7 @@ python production-data/scripts/validate_video_package.py production-data/example
 ### 两类 Skill 的使用边界
 
 - **视频制作者 / 使用者：** 使用 `.agents/skills/video-production-pipeline/`。结构化记录是可选试点，需时使用 `production-data/` 提供的本地验证器；不采用时可继续 Markdown 工作流。正常创作不需要调用 OPSX 或安装 OpenSpec CLI。
-- **仓库维护者 / 贡献者：** 在修改生产框架、工作流或规格时，使用 `.agents/skills/openspec-*/` 管理变更，并维护 `openspec/specs/` 与 `openspec/changes/`。这些 Skills 是仓库维护流程，不是视频生产功能。
+- **仓库维护者 / 贡献者：** 在修改本仓库任何拟保留文件时，使用 `.agents/skills/openspec-*/` 管理变更，并维护 `openspec/specs/` 与 `openspec/changes/`。这些 Skills 是仓库维护流程，不是视频生产功能。
 - **分发边界：** 若只分发核心 Markdown 制作 Skill，包含 `video-production-pipeline/` 目录即可；若要使用结构化记录校验功能，还需一并分发 `production-data/` 并安装其 Python 依赖。OPSX Skills 和 `openspec/` 属于本仓库的维护体系，不是视频生产运行依赖。
 
 | 路径 | 面向对象 | 用途 |
@@ -200,9 +200,10 @@ python production-data/scripts/validate_video_package.py production-data/example
 
 | 日期 | 版本 | 归档变更 | 摘要 |
 |---|---|---|---|
+| 2026-10-19 | `v2.0.0` | `tighten-audio-validation-and-opsx-governance` | 将拟保留的仓库改动统一纳入 OPSX；增加 G1 旁白试听/版本确认、G2 音频测量与人工审听分离，以及最小验证交付边界。 |
 | 2026-10-19 | `v1.2.0` | `add-auditable-quality-gates-and-provenance` | 新增可审计的 G0–G4 门禁、生成资产来源与权利追溯，以及可复现的本地媒体检查。 |
 | 2026-10-18 | `v1.1.0` | `add-structured-production-validation` | 新增可选结构化生产记录、Schema 与本地关联校验器，明确机器门禁和人工审核边界。 |
-| 2026-10-18 | —（文档维护，未发布） | dd-repository-onboarding-and-html-sync | 补充克隆、Skills、OPSX DIY/贡献指南，并建立生产框架变更时核对/同步 HTML 的 Agent 规则。 |
+| 2026-10-18 | —（文档维护，未发布） | add-repository-onboarding-and-html-sync | 补充克隆、Skills、OPSX DIY/贡献指南，并建立生产框架变更时核对/同步 HTML 的 Agent 规则。 |
 | 2026-10-18 | `v1.0.0` | `generalize-video-production-pipeline` | 建立项目无关的视频生产框架，补齐背景采集、生产工作流、项目档案治理和质量门禁。 |
 
 每次归档发布前更新此记录；只写简短、可公开的变更摘要，完整方案和任务以 `openspec/changes/archive/` 中的归档为准。

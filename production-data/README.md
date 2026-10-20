@@ -49,9 +49,39 @@ python production-data/scripts/check_media.py final.mp4 --config media-check-con
 
 需本机提供 `ffprobe` 和 `ffmpeg`，且配置中记录版本字符串、目标宽高/帧率、预期时长及容差、字幕覆盖率阈值、音频峰值上限、是否必需字幕/音频。配置缺项、工具版本不匹配、媒体/字幕不可读时返回 `blocked`，不会误报 PASS。字幕覆盖率按 cue 时间区间并集/媒体时长计算；峰值使用 `ffmpeg volumedetect` 的 sample peak 口径。结果 JSON 可作为 GateRun 证据附件。机器只量化规格/时间/峰值，不判断字幕可读性、音画观感或许可充分性。
 
+### G2 音频：逐项启用，自动测量与人工审听分开
+
+旧 `schema_version: 1.0.0` 的配置仍执行 `ffmpeg volumedetect` 的 **sample peak dBFS**；不是 true peak。新版 `1.1.0` 可增加 `audio_metrics`，且仍执行旧 sample peak 检查。未列出的可选测量是**未启用**，不是 PASS。下面仅是字段结构示意，阈值必须由本任务确定，不得照抄为通用平台标准：
+
+```json
+{
+  "schema_version": "1.1.0",
+  "audio_metrics": {
+    "rule_version": "1.0.0",
+    "true_peak_dbtp": {"max_dbtp": -2.0},
+    "integrated_lufs": {"min_lufs": -24.0, "max_lufs": -16.0},
+    "voice_music_rms_delta_db": {
+      "min_delta_db": 3.0, "voice_path": "voice.wav", "music_path": "music.wav",
+      "intervals": [{"start_seconds": 1.0, "end_seconds": 3.0}]
+    }
+  }
+}
+```
+
+把上述 `audio_metrics` 放入已有完整媒体配置 JSON；其余必填字段参见 Schema。路径相对配置文件目录，须为时间对齐的**分离音轨**，语音区间明确、同窗测两轨，取最小窗内人声减音乐的 ungated `volumedetect mean_volume` RMS dBFS；不把混音的不同片段当分轨。`ebur128=peak=true` 输出整体 gated integrated LUFS 与 oversampled true peak dBTP；sample peak、true peak、RMS、LUFS 都是不同测量，不能互代。每项 JSON `audio_evidence` 含输入 SHA-256、配置 SHA-256/规则版本、ffmpeg 版本、方法、单位、阈值、实测和状态；分轨项还记时间窗及各轨 RMS。
+
+```powershell
+python production-data/scripts/check_media.py path/to/preview.mp4 --config path/to/media-check-config.json --subtitles path/to/subtitles.srt
+python -m unittest discover -s production-data/tests -p test_audio_metrics.py -v
+```
+
+缺少必需阈值、分轨、有效区间或工具/滤镜不可用时该项 `blocked`（总退出码 2），超项目阈值为 `fail`（退出码 1），未启用的项目不运行；`required: false` 可在单项配置注明非阻断试测，证据仍保留其 blocked/fail 而不冒充 pass。旧版 1.0.0 配置不能附加 `audio_metrics`，需要时改版本为 1.1.0；回退时去掉新字段恢复旧版本，不移除旧 sample peak。检查器不测人声/字幕语义同步、表演或权利充分性。人工审听另存 G2 GateRun/Review：清晰度、声音表演、音乐遮盖、节奏和品牌适配由人签认，不因数值通过自动批准。
+
+最小验证仅在 Brief/Markdown 交付合同中声明范围、目标、必要产物、停止/升级条件与未覆盖门禁；不改现有 VideoBrief Schema，旧包无需迁移。升级后必须重新执行新范围适用的 G2/G3 审查，验证档 PASS 不是发布批准。
+
 ## 机器/人工边界
 
-- 机器：Schema 必填与枚举、唯一 ID/版本、引用存在、目标版本、闭包、哈希格式/本地匹配、声明日期，以及明确配置的媒体规格/时长/字幕区间/音频峰值。
+- 机器：Schema 必填与枚举、唯一 ID/版本、引用存在、目标版本、闭包、哈希格式/本地匹配、声明日期，以及明确配置的媒体规格/时长/字幕区间/sample peak 与可选的真峰值、LUFS、分轨 RMS 差。
 - 人工：事实真实性、来源可靠性、权利范围解释及充分性、品牌适配、表达与字幕可读性、连续性/审美、法规/平台合规。
 - 权利字段缺失/未知或适用期限已过时，新 Manifest 的发布就绪检查阻断；`verified` 是责任人声明，不是机器推断。
 

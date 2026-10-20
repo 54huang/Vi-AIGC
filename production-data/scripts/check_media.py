@@ -4,7 +4,8 @@ from __future__ import annotations
 import argparse, hashlib, json, re, shutil, subprocess, sys
 from pathlib import Path
 
-VERSION='1.0.0'
+VERSION='1.1.0'
+from audio_metrics import measure as measure_audio
 
 def run(cmd):
     try:
@@ -92,12 +93,19 @@ def check_media(media: Path, config_path: Path, subtitles: Path|None=None):
     if cfg.get('required_audio',True):
         if not audio: result['diagnostics'].append('必需音频流缺失'); return result
         peak=subprocess.run(['ffmpeg','-hide_banner','-nostats','-i',str(media),'-vn','-af','volumedetect','-f','null','NUL' if sys.platform=='win32' else '/dev/null'],capture_output=True,text=True)
+        if peak.returncode: result['diagnostics'].append('ffmpeg sample peak 检查失败：'+peak.stderr.strip()[-500:]); return result
         match=re.search(r'max_volume:\s*(-?inf|[-\d.]+) dB',peak.stderr)
         if not match: result['diagnostics'].append('无法从 ffmpeg volumedetect 取得音频峰值'); return result
         peak_db=-120.0 if match.group(1)=='-inf' else float(match.group(1))
         emit('audio_peak_dbfs',peak_db<=float(cfg['audio_peak_dbfs_max']),peak_db,cfg['audio_peak_dbfs_max'])
+    if cfg.get('audio_metrics'):
+        extras, evidence=measure_audio(media,cfg,duration,ver,file_sha256,config_path,'NUL' if sys.platform=='win32' else '/dev/null')
+        checks.extend(extras); result['audio_evidence']=evidence
+        for check in extras:
+            if check['status']=='blocked' and check.get('required',True):
+                result['diagnostics'].append(check['check_id']+': '+check.get('diagnostic','measurement blocked'))
     result['tool_versions']=ver; result['input_size_bytes']=media.stat().st_size; result['input_sha256']=file_sha256(media); result['measurements']={'duration_seconds':duration,'video_codec':video.get('codec_name'),'width':video.get('width'),'height':video.get('height'),'frame_rate':actual_fps,'audio_present':audio is not None}; result['checks']=checks
-    result['status']='pass' if all(x['status']=='pass' for x in checks) else 'fail'; return result
+    result['status']='blocked' if any(x['status']=='blocked' and x.get('required',True) for x in checks) else ('fail' if any(x['status']=='fail' and x.get('required',True) for x in checks) else 'pass'); return result
 
 def main():
     ap=argparse.ArgumentParser(description='Local media gate checks; no semantic or rights sufficiency judgments.')
