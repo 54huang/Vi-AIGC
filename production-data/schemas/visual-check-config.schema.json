@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/video-production/visual-check-config.schema.json",
+  "title": "VisualDiagnosticConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "video_sha256",
+    "analysis_profile",
+    "width",
+    "height",
+    "scenes",
+    "motion_threshold",
+    "cut_threshold",
+    "sample_every_frames"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "video_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "analysis_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1920
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1080
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "start_frame",
+          "end_frame"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "shot_ref": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "version"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+$"
+              }
+            }
+          },
+          "start_frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_frame": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "motion_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "cut_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "sample_every_frames": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "brand_colors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "rgb",
+          "tolerance"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "rgb": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "tolerance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 441.673
+          }
+        }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_static_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_mean_luma": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 255
+        }
+      }
+    }
+  }
+}

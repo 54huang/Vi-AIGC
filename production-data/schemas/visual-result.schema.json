@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/video-production/visual-result.schema.json",
+  "title": "VisualDiagnosticResult",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "human_review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": [
+        "informational",
+        "blocked"
+      ]
+    },
+    "diagnostic": {
+      "type": "string"
+    },
+    "human_review": {
+      "type": "string"
+    },
+    "video_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "analysis_profile": {
+      "type": "string"
+    },
+    "method": {
+      "type": "object"
+    },
+    "video": {
+      "type": "object",
+      "required": [
+        "frame_count",
+        "video_duration_seconds",
+        "container_duration_seconds"
+      ]
+    },
+    "whole_video": {
+      "type": "object"
+    },
+    "frames": {
+      "type": "array"
+    },
+    "per_second": {
+      "type": "array"
+    },
+    "scenes": {
+      "type": "array"
+    },
+    "overlaps": {
+      "type": "array"
+    },
+    "unassigned_frames": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "static_intervals": {
+      "type": "array"
+    },
+    "events": {
+      "type": "array"
+    },
+    "sample_index": {
+      "type": "array"
+    },
+    "rules": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "blocked"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "diagnostic"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "informational"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "video_sha256",
+          "analysis_profile",
+          "method",
+          "video",
+          "whole_video",
+          "frames",
+          "per_second",
+          "scenes",
+          "overlaps",
+          "unassigned_frames",
+          "static_intervals",
+          "events",
+          "sample_index",
+          "rules"
+        ]
+      }
+    }
+  ]
+}

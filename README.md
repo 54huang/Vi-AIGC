@@ -4,7 +4,7 @@
 
 本仓库维护一套面向 AI 辅助视频制作的**项目无关框架**：从项目背景采集、事实与素材授权核验，到选题、脚本、镜头、声音、参考资产、预演、成片验收和复盘。它帮助创作者稳定地产出可执行的视频方案，并降低反复沟通、返工和素材漂移。
 
-**当前版本：** `v2.0.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
+**当前版本：** `v2.1.0`　|　**项目形态：** 文档与 Agent Skill 驱动的工作流框架　|　**主要语言：** 简体中文
 
 ## 这是什么 / 不是什么
 
@@ -42,6 +42,10 @@
 3. 提交本条任务需求：目标、目标观众、观众问题、单一核心结论、时长/平台（如已知）、素材/音乐、资源边界及所需交付物。
 4. 按[生产工作流与质量门禁](.agents/skills/video-production-pipeline/references/production-workflow.md)逐阶段推进。先确认脚本和低成本预演，再批量生成；按反馈只返修受影响的部分。可选采用结构化记录时，先读 [`production-data/README.md`](production-data/README.md)，并依[迁移指南](production-data/MIGRATION.md)试点。
 5. **仅仓库维护者需要：** 修改生产框架或规范时，使用 OPSX Skills 建立变更方案、实施、同步规格并归档；归档后的版本、提交和推送遵循[归档发布规则](.agents/skills/openspec-archive-change/SKILL.md)。普通视频制作不依赖 OPSX。
+
+## 视觉诊断与交接案例（可选）
+
+[结构化记录与视觉诊断用法](production-data/README.md)包含项目配置、独立检查命令及其 `informational`/`blocked`/`fail` 边界；[MotionRecipe 与多工具交接](.agents/skills/video-production-pipeline/references/motion-handoff.md)提供无品牌的代表镜头、转场帧预算与改版影响矩阵。[三版测试公开技术摘要](production-data/visual-test-retrospective.md)仅是报告观测和回归计划，不是媒体复测、素材权利确认或真实品牌发布批准。不同尺度/滤波的运动数值不可直接作效果比较。
 
 ## 克隆、使用与 DIY / 贡献指南
 
@@ -200,6 +204,7 @@ python production-data/scripts/validate_video_package.py production-data/example
 
 | 日期 | 版本 | 归档变更 | 摘要 |
 |---|---|---|---|
+| 2026-10-23 | `v2.1.0` | `improve-visual-qa-and-production-handoffs` | 新增可复核的可选视觉诊断、工具无关的动效/资产交接，以及多工具门禁映射与改版影响链；保留人工审看与授权审批边界。 |
 | 2026-10-19 | `v2.0.0` | `tighten-audio-validation-and-opsx-governance` | 将拟保留的仓库改动统一纳入 OPSX；增加 G1 旁白试听/版本确认、G2 音频测量与人工审听分离，以及最小验证交付边界。 |
 | 2026-10-19 | `v1.2.0` | `add-auditable-quality-gates-and-provenance` | 新增可审计的 G0–G4 门禁、生成资产来源与权利追溯，以及可复现的本地媒体检查。 |
 | 2026-10-18 | `v1.1.0` | `add-structured-production-validation` | 新增可选结构化生产记录、Schema 与本地关联校验器，明确机器门禁和人工审核边界。 |

@@ -94,3 +94,17 @@ python -m unittest discover -s production-data/tests -p test_audio_metrics.py -v
 - `scripts/check_media.py`：本地可复现媒体测量适配器。
 - `tests/`：Schema、引用、门禁、追溯和媒体边界测试。
 - `MIGRATION.md`：渐进迁移/回滚步骤。
+
+## 可选视觉诊断（G2/G3 的定位证据，非创意批准）
+
+`schemas/visual-check-config.schema.json` 与 `schemas/visual-result.schema.json` 定义配置/结果形状；前者定义独立 `1.0.0` 配置；`examples/visual-check-config.example.json` 是**占位模板**（全零视频哈希不能直接用于生产）。先计算目标视频 SHA-256，写明分析 profile、解码尺度、运动/事件阈值、采样间隔和有来源的 `[start_frame,end_frame)` 场景区间；`rules` 只在项目确实需要客观限制时填写。错误/缺失参数不默填。与旧 `media-check-config` 独立，旧检查无需迁移。
+
+```powershell
+python production-data/scripts/check_visual.py path/to/video.mp4 path/to/visual.json --output path/to/visual-result.json
+# 可选：依据同版本清单的单条机器规则输出 GateRun 草稿，先准备明确的 gate-context.json
+python production-data/scripts/check_visual.py path/to/video.mp4 path/to/visual.json --output path/to/visual-result.json --gate-context path/to/gate-context.json --gate-output path/to/visual-gate-run.json
+```
+
+`gate-context.json` 应包含 `rule` (`max_static_frames` 或 `min_mean_luma`)、`id`、`version`、`checklist_ref` (`id`/`version`)、`check_id`、`rule_version`、`target` (`type`/`id`/`version`)、`owner`、`configuration_version` 及可选 `dependency_refs`；必须与正式清单规则和精确对象版本一致，生成的草稿应先校验并写入项目包，再由 `evaluate_gate.py` 核对。视觉命令在只出诊断时返回 0/2（信息性成功/阻断），输出门禁草稿时对 `pass/fail/blocked` 返回 0/1/2；这不是整体 G2/G3 状态。缺规则产生 `blocked`，不可用的文件/工具/哈希/场景配置也产生 `blocked` 诊断，不能把命令退出 0 当作 G2/G3 PASS。每个创意、文字可读、品牌适配、事实、授权与发布项目仍须独立人审 GateRun；清单应显式列入这些阻断项。
+
+结果含逐帧、逐秒、逐场指标、静止区间、切点/场内事件、代表采样**帧索引**（不导出原始画面）、项目色占比、分析方法、视频哈希、视频帧时长与容器时长。场景可重叠：逐场独立计数、全片只计一次并明确报告重叠和未覆盖帧。运动 MAD 使用缩放后 BT.709 亮度的相邻帧绝对差均值，无模糊；采样索引供人工在源视频定位。不同 profile、尺度、滤波或工具版本不可直接比较改善幅度。长片默认最多解码 18000 帧，累计像素预算至多 3 亿；`--max-frames` 可调低，并可缩小分析尺度；超限不返回伪完整结果。程序依赖 `ffmpeg`、`ffprobe` 在 PATH 中和现有 requirements 的 `jsonschema`，缺依赖则阻断，静态配置测试无需媒体工具。

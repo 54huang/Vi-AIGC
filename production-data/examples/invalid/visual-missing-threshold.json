@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "video_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "analysis_profile": "demo-rgb32x18-v1",
+  "width": 32,
+  "height": 18,
+  "cut_threshold": 30,
+  "sample_every_frames": 5,
+  "scenes": [
+    {
+      "label": "opening",
+      "shot_ref": {
+        "id": "shot_demo-opening",
+        "version": "1.0.0"
+      },
+      "start_frame": 0,
+      "end_frame": 30
+    },
+    {
+      "label": "ending",
+      "start_frame": 27,
+      "end_frame": 60
+    }
+  ],
+  "brand_colors": [
+    {
+      "label": "example-blue",
+      "rgb": [
+        10,
+        80,
+        170
+      ],
+      "tolerance": 25
+    }
+  ],
+  "rules": {
+    "max_static_frames": 28
+  }
+}
